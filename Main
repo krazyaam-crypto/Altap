@@ -5,21 +5,19 @@ local player = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local TitleBar = Instance.new("Frame")
-local TitleBox = Instance.new("Frame") -- Ô chứa chữ Altap Hub
 local TitleText = Instance.new("TextLabel")
 local Sidebar = Instance.new("Frame")
-local SidebarScroll = Instance.new("ScrollingFrame") -- Thanh cuộn cho nút
+local SidebarScroll = Instance.new("ScrollingFrame")
 local TabContainer = Instance.new("Frame")
 
--- Cấu hình màu sắc chuẩn
-local ACCENT_GREEN = Color3.fromRGB(0, 200, 0)
+-- Cấu hình màu sắc
+local ACCENT_GREEN = Color3.fromRGB(0, 200, 0) -- Xanh lá cho toàn bộ nút
 local BG_DARK = Color3.fromRGB(15, 15, 15)
 local SIDEBAR_BG = Color3.fromRGB(20, 20, 20)
-local BTN_COLOR = Color3.fromRGB(30, 30, 30)
-local TITLE_BOX_COLOR = Color3.fromRGB(60, 60, 60) -- Màu xám cho ô chứa tên UI
+local PROFILE_GRAY = Color3.fromRGB(35, 35, 35) -- Màu xám nhẹ cho Profile
 
--- 1. Khởi tạo UI
-ScreenGui.Name = "AltapHub_Fixed"
+-- 1. Khởi tạo UI chính
+ScreenGui.Name = "AltapHub_FullGreen"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -31,25 +29,23 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- 2. Thanh tiêu đề & Ô tên UI (Fix góc trái)
+-- 2. Thanh tiêu đề (Title)
 TitleBar.Parent = MainFrame
 TitleBar.BackgroundColor3 = ACCENT_GREEN
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
 Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
 
-TitleBox.Parent = TitleBar
-TitleBox.BackgroundColor3 = TITLE_BOX_COLOR
-TitleBox.Size = UDim2.new(0, 100, 1, 0)
-Instance.new("UICorner", TitleBox).CornerRadius = UDim.new(0, 5)
-
-TitleText.Parent = TitleBox
-TitleText.Size = UDim2.new(1, 0, 1, 0)
+TitleText.Parent = TitleBar
+TitleText.Size = UDim2.new(0, 150, 1, 0)
+TitleText.Position = UDim2.new(0, 15, 0, 0)
+TitleText.BackgroundTransparency = 1
 TitleText.Text = "Altap Hub"
 TitleText.Font = Enum.Font.GothamBold
 TitleText.TextColor3 = Color3.new(1, 1, 1)
-TitleText.TextSize = 14
+TitleText.TextSize = 16
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
 
--- Nút Close/Mini
+-- Nút điều khiển (X, -)
 local CloseBtn = Instance.new("TextButton", TitleBar)
 CloseBtn.Text = "X"
 CloseBtn.Position = UDim2.new(1, -35, 0, 0)
@@ -65,7 +61,7 @@ MiniBtn.BackgroundTransparency = 1
 MiniBtn.TextColor3 = Color3.new(1, 1, 1)
 MiniBtn.TextSize = 20
 
--- 3. Sidebar có thanh cuộn
+-- 3. Sidebar Cuộn
 Sidebar.Parent = MainFrame
 Sidebar.BackgroundColor3 = SIDEBAR_BG
 Sidebar.Position = UDim2.new(0, 5, 0, 40)
@@ -73,9 +69,9 @@ Sidebar.Size = UDim2.new(0, 140, 1, -45)
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
 
 SidebarScroll.Parent = Sidebar
-SidebarScroll.Size = UDim2.new(1, 0, 1, -60) -- Trừ ra khoảng cho Profile bên dưới
+SidebarScroll.Size = UDim2.new(1, 0, 1, -60)
 SidebarScroll.BackgroundTransparency = 1
-SidebarScroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Tự kéo dài khi thêm nút
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Thanh cuộn
 SidebarScroll.ScrollBarThickness = 2
 
 local Layout = Instance.new("UIListLayout", SidebarScroll)
@@ -83,17 +79,17 @@ Layout.Padding = UDim.new(0, 5)
 Layout.HorizontalAlignment = "Center"
 Instance.new("UIPadding", SidebarScroll).PaddingTop = UDim.new(0, 10)
 
--- 4. Hàm tạo nút Menu (Fix màu sắc)
-local Pages = {}
-local TabContainer = Instance.new("Frame", MainFrame)
+-- 4. Hệ thống Tab (Tất cả nút màu xanh lá)
+TabContainer.Parent = MainFrame
 TabContainer.Position = UDim2.new(0, 150, 0, 40)
 TabContainer.Size = UDim2.new(1, -155, 1, -45)
 TabContainer.BackgroundTransparency = 1
 
-local function CreateTab(name, isStatus)
+local Pages = {}
+local function CreateTab(name)
     local btn = Instance.new("TextButton", SidebarScroll)
     btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.BackgroundColor3 = isStatus and ACCENT_GREEN or BTN_COLOR
+    btn.BackgroundColor3 = ACCENT_GREEN -- Tất cả nút xanh lá
     btn.Text = name
     btn.Font = Enum.Font.GothamMedium
     btn.TextColor3 = Color3.new(1,1,1)
@@ -109,39 +105,43 @@ local function CreateTab(name, isStatus)
         for _, v in pairs(Pages) do v.Visible = false end
         pg.Visible = true
     end)
-    return pg
 end
 
--- Tạo các Tab theo yêu cầu
-CreateTab("Trạng thái", true) -- Nút xanh nổi bật
+-- Tạo danh sách các Tab
+CreateTab("Status") -- Giữ nguyên tiếng Anh
 CreateTab("Farm")
 CreateTab("Local Player")
 CreateTab("Shop")
-CreateTab("Setting") -- Thêm sẵn để bạn cuộn thử
+CreateTab("Setting")
 
--- 5. Profile cố định ở đáy Sidebar
+-- 5. Profile (Nền xám nhẹ)
 local Profile = Instance.new("Frame", Sidebar)
-Profile.Size = UDim2.new(1, 0, 0, 50)
-Profile.Position = UDim2.new(0, 0, 1, -55)
-Profile.BackgroundTransparency = 1
+Profile.Size = UDim2.new(1, -10, 0, 45)
+Profile.Position = UDim2.new(0, 5, 1, -50)
+Profile.BackgroundColor3 = PROFILE_GRAY -- Xám chút xíu
+Instance.new("UICorner", Profile).CornerRadius = UDim.new(0, 8)
 
 local Img = Instance.new("ImageLabel", Profile)
-Img.Size = UDim2.new(0, 35, 0, 35)
-Img.Position = UDim2.new(0, 10, 0, 7)
+Img.Size = UDim2.new(0, 30, 0, 30)
+Img.Position = UDim2.new(0, 7, 0, 7)
 Img.Image = Players:GetUserThumbnailAsync(player.UserId, "HeadShot", "Size420x420")
+Img.BackgroundTransparency = 1
 Instance.new("UICorner", Img).CornerRadius = UDim.new(1, 0)
 
 local Name = Instance.new("TextLabel", Profile)
 Name.Text = player.DisplayName
-Name.Size = UDim2.new(1, -55, 1, 0)
-Name.Position = UDim2.new(0, 50, 0, 0)
+Name.Size = UDim2.new(1, -45, 1, 0)
+Name.Position = UDim2.new(0, 42, 0, 0)
 Name.TextColor3 = Color3.new(1, 1, 1)
 Name.BackgroundTransparency = 1
 Name.TextXAlignment = "Left"
 Name.Font = "GothamMedium"
-Name.TextSize = 11
+Name.TextSize = 10
 
--- Logic đóng/mở
+-- Mặc định mở Status
+Pages.Status.Visible = true
+
+-- Logic đóng mở UI
 CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
 UserInputService.InputBegan:Connect(function(io, p)
     if not p and io.KeyCode == Enum.KeyCode.LeftControl then MainFrame.Visible = not MainFrame.Visible end
