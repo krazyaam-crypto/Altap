@@ -1,124 +1,125 @@
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 
 local player = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local TitleBar = Instance.new("Frame")
+local TitleBox = Instance.new("Frame") -- Ô chứa chữ Altap Hub
 local TitleText = Instance.new("TextLabel")
 local Sidebar = Instance.new("Frame")
-local TabContainer = Instance.new("Frame") -- Chứa các trang nội dung
+local SidebarScroll = Instance.new("ScrollingFrame") -- Thanh cuộn cho nút
+local TabContainer = Instance.new("Frame")
 
--- Màu sắc
+-- Cấu hình màu sắc chuẩn
 local ACCENT_GREEN = Color3.fromRGB(0, 200, 0)
-local BG_BLACK = Color3.fromRGB(15, 15, 15)
-local SIDEBAR_COLOR = Color3.fromRGB(20, 20, 20)
-local BTN_DARK = Color3.fromRGB(30, 30, 30)
+local BG_DARK = Color3.fromRGB(15, 15, 15)
+local SIDEBAR_BG = Color3.fromRGB(20, 20, 20)
+local BTN_COLOR = Color3.fromRGB(30, 30, 30)
+local TITLE_BOX_COLOR = Color3.fromRGB(60, 60, 60) -- Màu xám cho ô chứa tên UI
 
--- 1. Khởi tạo UI chính
-ScreenGui.Name = "AltapHub_FinalBase"
+-- 1. Khởi tạo UI
+ScreenGui.Name = "AltapHub_Fixed"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = BG_BLACK
+MainFrame.BackgroundColor3 = BG_DARK
 MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
 MainFrame.Size = UDim2.new(0, 600, 0, 400)
 MainFrame.Active = true
 MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- 2. TitleBar
+-- 2. Thanh tiêu đề & Ô tên UI (Fix góc trái)
 TitleBar.Parent = MainFrame
 TitleBar.BackgroundColor3 = ACCENT_GREEN
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
-Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
 
-TitleText.Parent = TitleBar
+TitleBox.Parent = TitleBar
+TitleBox.BackgroundColor3 = TITLE_BOX_COLOR
+TitleBox.Size = UDim2.new(0, 100, 1, 0)
+Instance.new("UICorner", TitleBox).CornerRadius = UDim.new(0, 5)
+
+TitleText.Parent = TitleBox
+TitleText.Size = UDim2.new(1, 0, 1, 0)
 TitleText.Text = "Altap Hub"
 TitleText.Font = Enum.Font.GothamBold
-TitleText.TextColor3 = Color3.new(1,1,1)
-TitleText.TextSize = 16
-TitleText.Position = UDim2.new(0, 15, 0, 0)
-TitleText.Size = UDim2.new(0, 100, 1, 0)
-TitleText.TextXAlignment = "Left"
+TitleText.TextColor3 = Color3.new(1, 1, 1)
+TitleText.TextSize = 14
 
--- Nút Close/Minimize (viết gọn)
-local function CreateControlBtn(txt, pos, color)
-    local btn = Instance.new("TextButton", TitleBar)
-    btn.Text = txt
-    btn.Size = UDim2.new(0, 35, 1, 0)
-    btn.Position = pos
-    btn.BackgroundTransparency = 1
-    btn.TextColor3 = color or Color3.new(1,1,1)
-    return btn
-end
-local CloseBtn = CreateControlBtn("X", UDim2.new(1, -35, 0, 0))
-local MiniBtn = CreateControlBtn("-", UDim2.new(1, -70, 0, 0))
+-- Nút Close/Mini
+local CloseBtn = Instance.new("TextButton", TitleBar)
+CloseBtn.Text = "X"
+CloseBtn.Position = UDim2.new(1, -35, 0, 0)
+CloseBtn.Size = UDim2.new(0, 35, 1, 0)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
 
--- 3. Sidebar
+local MiniBtn = Instance.new("TextButton", TitleBar)
+MiniBtn.Text = "-"
+MiniBtn.Position = UDim2.new(1, -70, 0, 0)
+MiniBtn.Size = UDim2.new(0, 35, 1, 0)
+MiniBtn.BackgroundTransparency = 1
+MiniBtn.TextColor3 = Color3.new(1, 1, 1)
+MiniBtn.TextSize = 20
+
+-- 3. Sidebar có thanh cuộn
 Sidebar.Parent = MainFrame
-Sidebar.BackgroundColor3 = SIDEBAR_COLOR
+Sidebar.BackgroundColor3 = SIDEBAR_BG
 Sidebar.Position = UDim2.new(0, 5, 0, 40)
 Sidebar.Size = UDim2.new(0, 140, 1, -45)
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
 
-local SidebarLayout = Instance.new("UIListLayout", Sidebar)
-SidebarLayout.Padding = UDim.new(0, 5)
-SidebarLayout.HorizontalAlignment = "Center"
-Instance.new("UIPadding", Sidebar).PaddingTop = UDim.new(0, 10)
+SidebarScroll.Parent = Sidebar
+SidebarScroll.Size = UDim2.new(1, 0, 1, -60) -- Trừ ra khoảng cho Profile bên dưới
+SidebarScroll.BackgroundTransparency = 1
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Tự kéo dài khi thêm nút
+SidebarScroll.ScrollBarThickness = 2
 
--- 4. Tab Container (Nơi chứa các trang chức năng)
-TabContainer.Parent = MainFrame
+local Layout = Instance.new("UIListLayout", SidebarScroll)
+Layout.Padding = UDim.new(0, 5)
+Layout.HorizontalAlignment = "Center"
+Instance.new("UIPadding", SidebarScroll).PaddingTop = UDim.new(0, 10)
+
+-- 4. Hàm tạo nút Menu (Fix màu sắc)
+local Pages = {}
+local TabContainer = Instance.new("Frame", MainFrame)
 TabContainer.Position = UDim2.new(0, 150, 0, 40)
 TabContainer.Size = UDim2.new(1, -155, 1, -45)
 TabContainer.BackgroundTransparency = 1
 
-local Pages = {}
-local function CreatePage(name)
-    local pg = Instance.new("ScrollingFrame", TabContainer)
-    pg.Name = name.."Page"
-    pg.Size = UDim2.new(1, 0, 1, 0)
-    pg.BackgroundTransparency = 1
-    pg.Visible = false
-    pg.ScrollBarThickness = 2
-    Pages[name] = pg
-    return pg
-end
-
--- Tạo các trang
-CreatePage("Status")
-CreatePage("Shop")
-CreatePage("Local")
-CreatePage("Farm")
-
--- 5. Hàm tạo nút Menu
-local function CreateMenuBtn(name, color)
-    local btn = Instance.new("TextButton", Sidebar)
-    btn.Name = name.."Btn"
+local function CreateTab(name, isStatus)
+    local btn = Instance.new("TextButton", SidebarScroll)
     btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.BackgroundColor3 = color or BTN_DARK
+    btn.BackgroundColor3 = isStatus and ACCENT_GREEN or BTN_COLOR
     btn.Text = name
     btn.Font = Enum.Font.GothamMedium
     btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextSize = 13
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    
+
+    local pg = Instance.new("ScrollingFrame", TabContainer)
+    pg.Size = UDim2.new(1, 0, 1, 0)
+    pg.BackgroundTransparency = 1
+    pg.Visible = false
+    Pages[name] = pg
+
     btn.MouseButton1Click:Connect(function()
-        for _, p in pairs(Pages) do p.Visible = false end
-        Pages[name].Visible = true
-        -- Hiệu ứng đổi màu nút khi chọn (tùy chọn)
+        for _, v in pairs(Pages) do v.Visible = false end
+        pg.Visible = true
     end)
+    return pg
 end
 
--- Lắp các nút vào Sidebar
-CreateMenuBtn("Status", ACCENT_GREEN)
-CreateMenuBtn("Shop")
-CreateMenuBtn("Local")
-CreateMenuBtn("Farm")
+-- Tạo các Tab theo yêu cầu
+CreateTab("Trạng thái", true) -- Nút xanh nổi bật
+CreateTab("Farm")
+CreateTab("Local Player")
+CreateTab("Shop")
+CreateTab("Setting") -- Thêm sẵn để bạn cuộn thử
 
--- 6. Profile (Góc dưới)
+-- 5. Profile cố định ở đáy Sidebar
 local Profile = Instance.new("Frame", Sidebar)
 Profile.Size = UDim2.new(1, 0, 0, 50)
 Profile.Position = UDim2.new(0, 0, 1, -55)
@@ -134,16 +135,13 @@ local Name = Instance.new("TextLabel", Profile)
 Name.Text = player.DisplayName
 Name.Size = UDim2.new(1, -55, 1, 0)
 Name.Position = UDim2.new(0, 50, 0, 0)
-Name.TextColor3 = Color3.new(1,1,1)
+Name.TextColor3 = Color3.new(1, 1, 1)
 Name.BackgroundTransparency = 1
 Name.TextXAlignment = "Left"
 Name.Font = "GothamMedium"
 Name.TextSize = 11
 
--- Mặc định mở trang Status
-Pages.Status.Visible = true
-
--- Logic đóng mở
+-- Logic đóng/mở
 CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
 UserInputService.InputBegan:Connect(function(io, p)
     if not p and io.KeyCode == Enum.KeyCode.LeftControl then MainFrame.Visible = not MainFrame.Visible end
