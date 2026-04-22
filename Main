@@ -1,19 +1,20 @@
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local TitleBar = Instance.new("Frame")
+local TitleCorner = Instance.new("UICorner")
 local CloseBtn = Instance.new("TextButton")
-local Sidebar = Instance.new("Frame")
-local MainContent = Instance.new("Frame")
+local MinimizeBtn = Instance.new("TextButton")
 
--- Cấu hình màu sắc (Đen toàn diện)
-local BG_BLACK = Color3.fromRGB(15, 15, 15) -- Màu nền chính siêu tối
-local TITLE_BLACK = Color3.fromRGB(25, 25, 25) -- Thanh tiêu đề hơi sáng hơn tí để phân biệt
-local TOGGLE_KEY = Enum.KeyCode.RightControl
+-- Cấu hình màu sắc
+local BG_BLACK = Color3.fromRGB(15, 15, 15)
+local ACCENT_GREEN = Color3.fromRGB(0, 200, 0) -- Màu xanh lá cho viền trên
+local TOGGLE_KEY = Enum.KeyCode.LeftControl -- Nhấn Ctrl trái để bật/mở
 
 -- 1. ScreenGui
-ScreenGui.Name = "UltraCleanGui"
+ScreenGui.Name = "CustomHub_V3"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -26,52 +27,66 @@ MainFrame.Size = UDim2.new(0, 500, 0, 300)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true 
+MainFrame.ClipsDescendants = true -- Để khi thu nhỏ nội dung sẽ biến mất
 
 UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
--- 3. Thanh tiêu đề (Chỉ giữ lại nút X)
+-- 3. Thanh tiêu đề (Màu xanh lá theo ý bạn)
 TitleBar.Name = "TitleBar"
 TitleBar.Parent = MainFrame
-TitleBar.BackgroundColor3 = TITLE_BLACK
-TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = ACCENT_GREEN
+TitleBar.Size = UDim2.new(1, 0, 0, 30)
 TitleBar.BorderSizePixel = 0
 
-local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 10)
 TitleCorner.Parent = TitleBar
 
+-- Nút đóng (X)
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Parent = TitleBar
 CloseBtn.BackgroundTransparency = 1
-CloseBtn.Position = UDim2.new(1, -35, 0, 0)
-CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.TextSize = 14
 
--- 4. Sidebar rỗng (Vùng bên trái)
-Sidebar.Name = "Sidebar"
-Sidebar.Parent = MainFrame
-Sidebar.BackgroundTransparency = 1 -- Làm trong suốt luôn
-Sidebar.Position = UDim2.new(0, 0, 0, 35)
-Sidebar.Size = UDim2.new(0, 100, 1, -35)
+-- Nút thu nhỏ (-)
+MinimizeBtn.Name = "MinimizeBtn"
+MinimizeBtn.Parent = TitleBar
+MinimizeBtn.BackgroundTransparency = 1
+MinimizeBtn.Position = UDim2.new(1, -60, 0, 0)
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.TextSize = 20
 
--- 5. Vùng nội dung rỗng (Vùng bên phải)
-MainContent.Name = "MainContent"
-MainContent.Parent = MainFrame
-MainContent.BackgroundTransparency = 1 -- Làm trong suốt luôn
-MainContent.Position = UDim2.new(0, 100, 0, 35)
-MainContent.Size = UDim2.new(1, -100, 1, -35)
+-- 4. Logic Thu nhỏ / Phóng to
+local isMinimized = false
+local originalSize = MainFrame.Size
 
--- 6. Đóng/Mở
-CloseBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
+MinimizeBtn.MouseButton1Click:Connect(function()
+	if not isMinimized then
+		MainFrame:TweenSize(UDim2.new(0, 500, 0, 30), "Out", "Quart", 0.3, true)
+		MinimizeBtn.Text = "+"
+	else
+		MainFrame:TweenSize(originalSize, "Out", "Quart", 0.3, true)
+		MinimizeBtn.Text = "-"
+	end
+	isMinimized = not isMinimized
 end)
 
+-- 5. Logic Đóng hoàn toàn
+CloseBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = false
+end)
+
+-- 6. Logic Bật/Mở bằng phím Left Ctrl
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == TOGGLE_KEY then
-        MainFrame.Visible = not MainFrame.Visible
-    end
+	if not gameProcessed and input.KeyCode == TOGGLE_KEY then
+		MainFrame.Visible = not MainFrame.Visible
+	end
 end)
