@@ -1,0 +1,149 @@
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local TitleBar = Instance.new("Frame")
+local CloseBtn = Instance.new("TextButton")
+local Sidebar = Instance.new("Frame")
+local MainContent = Instance.new("ScrollingFrame")
+local ContentLayout = Instance.new("UIListLayout")
+
+-- Cấu hình chính (Để bạn tùy chỉnh nhanh)
+local THEME_COLOR = Color3.fromRGB(0, 180, 0) -- Màu xanh lá cây thương hiệu
+local BG_COLOR_DARK = Color3.fromRGB(20, 20, 20) -- Màu nền tối
+local BG_COLOR_ACCENT = Color3.fromRGB(30, 30, 30) -- Màu nền phụ
+local TEXT_COLOR_DIM = Color3.fromRGB(150, 150, 150) -- Màu chữ tối
+local CORNER_RADIUS = UDim.new(0, 8) -- Độ bo góc
+
+-- 1. ScreenGui
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "AnonymousHubGUI"
+
+-- 2. Khung chính (Main Frame) - CÓ THỂ DI CHUYỂN
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = BG_COLOR_DARK
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150) -- Đặt ở giữa màn hình
+MainFrame.Size = UDim2.new(0, 500, 0, 300) -- Kích thước giống ảnh mẫu
+MainFrame.Active = true
+MainFrame.Draggable = true -- Cho phép kéo
+MainFrame.BorderSizePixel = 0
+
+UICorner.CornerRadius = CORNER_RADIUS
+UICorner.Parent = MainFrame
+
+-- 3. Thanh tiêu đề (Title Bar)
+TitleBar.Name = "TitleBar"
+TitleBar.Parent = MainFrame
+TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Hơi sáng hơn nền một chút
+TitleBar.Size = UDim2.new(1, 0, 0, 30)
+TitleBar.BorderSizePixel = 0
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = CORNER_RADIUS
+TitleCorner.Parent = TitleBar
+
+-- Nút đóng (Close Button) - X
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Parent = TitleBar
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Position = UDim2.new(1, -25, 0, 0)
+CloseBtn.Size = UDim2.new(0, 25, 0, 30)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "X" -- Chỉ giữ lại chữ 'X' duy nhất
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 16
+
+-- Hiệu ứng nút đóng
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy() -- Xóa GUI khi bấm
+end)
+
+CloseBtn.MouseEnter:Connect(function()
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 0, 0) -- Đỏ khi di chuột
+end)
+
+CloseBtn.MouseLeave:Connect(function()
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+-- 4. Thanh bên (Sidebar)
+Sidebar.Name = "Sidebar"
+Sidebar.Parent = MainFrame
+Sidebar.BackgroundColor3 = BG_COLOR_DARK
+Sidebar.Position = UDim2.new(0, 0, 0, 30)
+Sidebar.Size = UDim2.new(0, 100, 1, -30)
+Sidebar.BorderSizePixel = 0
+
+local SideCorner = Instance.new("UICorner")
+SideCorner.CornerRadius = CORNER_RADIUS
+SideCorner.Parent = Sidebar
+
+-- Nút menu đầu tiên (Màu xanh) - Thay cho chữ "Main"
+local FirstMenuBtn = Instance.new("TextButton")
+FirstMenuBtn.Name = "Menu_1"
+FirstMenuBtn.Parent = Sidebar
+FirstMenuBtn.BackgroundColor3 = THEME_COLOR
+FirstMenuBtn.Position = UDim2.new(0.5, -40, 0, 10) -- Giữa sidebar
+FirstMenuBtn.Size = UDim2.new(0, 80, 0, 25) -- Bo góc như nút 'Main'
+FirstMenuBtn.Font = Enum.Font.GothamBold
+FirstMenuBtn.Text = "" -- RỖNG
+FirstMenuBtn.BorderSizePixel = 0
+
+local FirstCorner = Instance.new("UICorner")
+FirstCorner.CornerRadius = CORNER_RADIUS
+FirstCorner.Parent = FirstMenuBtn
+
+-- Nút menu thứ hai (Màu tối) - Thay cho chữ "Credits"
+local SecondMenuBtn = Instance.new("TextButton")
+SecondMenuBtn.Name = "Menu_2"
+SecondMenuBtn.Parent = Sidebar
+SecondMenuBtn.BackgroundTransparency = 1
+SecondMenuBtn.Position = UDim2.new(0.5, -40, 0, 40)
+SecondMenuBtn.Size = UDim2.new(0, 80, 0, 25)
+SecondMenuBtn.Font = Enum.Font.Gotham
+SecondMenuBtn.Text = "" -- RỖNG
+
+-- 5. Vùng nội dung chính (Main Content Area)
+MainContent.Name = "MainContent"
+MainContent.Parent = MainFrame
+MainContent.BackgroundColor3 = BG_COLOR_ACCENT
+MainContent.Position = UDim2.new(0, 100, 0, 30)
+MainContent.Size = UDim2.new(1, -100, 1, -30)
+MainContent.BorderSizePixel = 0
+MainContent.ScrollBarThickness = 4 -- Thanh cuộn mỏng
+
+ContentLayout.Parent = MainContent
+ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ContentLayout.Padding = UDim.new(0, 5) -- Khoảng cách giữa các mảng màu
+
+-- Hàm tạo các mảng màu mẫu (Ví dụ: Cho các Chest ESP)
+local function createContentBar(layoutOrder, useAccentColor)
+    local frame = Instance.new("Frame")
+    frame.Parent = MainContent
+    frame.LayoutOrder = layoutOrder
+    
+    if useAccentColor then
+        frame.BackgroundColor3 = THEME_COLOR -- Mảng màu xanh
+    else
+        frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35) -- Mảng màu tối hơn nền một chút
+    end
+    
+    frame.Size = UDim2.new(0.95, 0, 0, 35) -- Bo góc mượt
+    frame.BorderSizePixel = 0
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = CORNER_RADIUS
+    corner.Parent = frame
+    
+    return frame
+end
+
+-- Tạo các mảng nội dung mẫu giống bố cục ảnh
+createContentBar(1, true) -- Mảng xanh (như 'Chest ESP')
+createContentBar(2, false) -- 5 mảng tối (như các hòm)
+createContentBar(3, false)
+createContentBar(4, false)
+createContentBar(5, false)
+createContentBar(6, false)
+createContentBar(7, true) -- Mảng xanh (như 'Player')
+createContentBar(8, false) -- Mảng tối (như 'Visual')
