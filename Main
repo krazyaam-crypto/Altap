@@ -5,49 +5,62 @@ local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local TitleBar = Instance.new("Frame")
 local TitleCorner = Instance.new("UICorner")
+local TitleText = Instance.new("TextLabel")
 local CloseBtn = Instance.new("TextButton")
 local MinimizeBtn = Instance.new("TextButton")
 
--- Cấu hình màu sắc
+-- Cấu hình
 local BG_BLACK = Color3.fromRGB(15, 15, 15)
-local ACCENT_GREEN = Color3.fromRGB(0, 200, 0) -- Màu xanh lá cho viền trên
-local TOGGLE_KEY = Enum.KeyCode.LeftControl -- Nhấn Ctrl trái để bật/mở
+local ACCENT_GREEN = Color3.fromRGB(0, 200, 0)
+local TOGGLE_KEY = Enum.KeyCode.LeftControl
 
 -- 1. ScreenGui
-ScreenGui.Name = "CustomHub_V3"
+ScreenGui.Name = "AltapHub_Official"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- 2. Khung chính
+-- 2. Khung chính (Đã tăng kích thước lên 600x400)
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = BG_BLACK
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
-MainFrame.Size = UDim2.new(0, 500, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200) -- Căn giữa cho size mới
+MainFrame.Size = UDim2.new(0, 600, 0, 400)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true 
-MainFrame.ClipsDescendants = true -- Để khi thu nhỏ nội dung sẽ biến mất
+MainFrame.ClipsDescendants = true
 
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
--- 3. Thanh tiêu đề (Màu xanh lá theo ý bạn)
+-- 3. Thanh tiêu đề (Xanh lá)
 TitleBar.Name = "TitleBar"
 TitleBar.Parent = MainFrame
 TitleBar.BackgroundColor3 = ACCENT_GREEN
-TitleBar.Size = UDim2.new(1, 0, 0, 30)
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
 TitleBar.BorderSizePixel = 0
 
-TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.CornerRadius = UDim.new(0, 12)
 TitleCorner.Parent = TitleBar
+
+-- Tên UI: Altap Hub
+TitleText.Name = "TitleText"
+TitleText.Parent = TitleBar
+TitleText.BackgroundTransparency = 1
+TitleText.Position = UDim2.new(0, 15, 0, 0)
+TitleText.Size = UDim2.new(0, 200, 1, 0)
+TitleText.Font = Enum.Font.GothamBold
+TitleText.Text = "Altap Hub"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 16
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Nút đóng (X)
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Parent = TitleBar
 CloseBtn.BackgroundTransparency = 1
-CloseBtn.Position = UDim2.new(1, -30, 0, 0)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 0)
+CloseBtn.Size = UDim2.new(0, 35, 1, 0)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -57,8 +70,8 @@ CloseBtn.TextSize = 14
 MinimizeBtn.Name = "MinimizeBtn"
 MinimizeBtn.Parent = TitleBar
 MinimizeBtn.BackgroundTransparency = 1
-MinimizeBtn.Position = UDim2.new(1, -60, 0, 0)
-MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Position = UDim2.new(1, -70, 0, 0)
+MinimizeBtn.Size = UDim2.new(0, 35, 1, 0)
 MinimizeBtn.Font = Enum.Font.GothamBold
 MinimizeBtn.Text = "-"
 MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -66,27 +79,26 @@ MinimizeBtn.TextSize = 20
 
 -- 4. Logic Thu nhỏ / Phóng to
 local isMinimized = false
-local originalSize = MainFrame.Size
+local originalSize = UDim2.new(0, 600, 0, 400)
 
 MinimizeBtn.MouseButton1Click:Connect(function()
-	if not isMinimized then
-		MainFrame:TweenSize(UDim2.new(0, 500, 0, 30), "Out", "Quart", 0.3, true)
-		MinimizeBtn.Text = "+"
-	else
-		MainFrame:TweenSize(originalSize, "Out", "Quart", 0.3, true)
-		MinimizeBtn.Text = "-"
-	end
-	isMinimized = not isMinimized
+    if not isMinimized then
+        MainFrame:TweenSize(UDim2.new(0, 600, 0, 35), "Out", "Quart", 0.3, true)
+        MinimizeBtn.Text = "+"
+    else
+        MainFrame:TweenSize(originalSize, "Out", "Quart", 0.3, true)
+        MinimizeBtn.Text = "-"
+    end
+    isMinimized = not isMinimized
 end)
 
--- 5. Logic Đóng hoàn toàn
+-- 5. Đóng hoàn toàn & Bật/Mở bằng Left Ctrl
 CloseBtn.MouseButton1Click:Connect(function()
-	MainFrame.Visible = false
+    MainFrame.Visible = false
 end)
 
--- 6. Logic Bật/Mở bằng phím Left Ctrl
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not gameProcessed and input.KeyCode == TOGGLE_KEY then
-		MainFrame.Visible = not MainFrame.Visible
-	end
+    if not gameProcessed and input.KeyCode == TOGGLE_KEY then
+        MainFrame.Visible = not MainFrame.Visible
+    end
 end)
