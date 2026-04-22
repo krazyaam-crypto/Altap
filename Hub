@@ -10,14 +10,14 @@ local Sidebar = Instance.new("Frame")
 local SidebarScroll = Instance.new("ScrollingFrame")
 local TabContainer = Instance.new("Frame")
 
--- Cấu hình màu sắc
+-- Màu sắc chuẩn
 local ACCENT_GREEN = Color3.fromRGB(0, 200, 0) 
 local BG_DARK = Color3.fromRGB(15, 15, 15)
 local SIDEBAR_BG = Color3.fromRGB(20, 20, 20)
-local PROFILE_GRAY = Color3.fromRGB(35, 35, 35) -- Xám chút xíu cho Profile
+local PROFILE_GRAY = Color3.fromRGB(35, 35, 35)
 
--- 1. Khởi tạo UI chính
-ScreenGui.Name = "AltapHub_Beta"
+-- 1. Main Frame
+ScreenGui.Name = "AltapHub_FinalFix"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -29,14 +29,14 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- 2. Thanh tiêu đề (Title) - Chữ trắng trên nền xanh lá
+-- 2. Title Bar (Thanh tiêu đề xanh lá)
 TitleBar.Parent = MainFrame
 TitleBar.BackgroundColor3 = ACCENT_GREEN
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
 Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
 
 TitleText.Parent = TitleBar
-TitleText.Size = UDim2.new(0, 150, 1, 0)
+TitleText.Size = UDim2.new(1, 0, 1, 0)
 TitleText.Position = UDim2.new(0, 15, 0, 0)
 TitleText.BackgroundTransparency = 1
 TitleText.Text = "Altap Hub"
@@ -45,7 +45,7 @@ TitleText.TextColor3 = Color3.new(1, 1, 1)
 TitleText.TextSize = 16
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 
--- Nút điều khiển
+-- Nút đóng/thu nhỏ
 local CloseBtn = Instance.new("TextButton", TitleBar)
 CloseBtn.Text = "X"
 CloseBtn.Position = UDim2.new(1, -35, 0, 0)
@@ -53,15 +53,7 @@ CloseBtn.Size = UDim2.new(0, 35, 1, 0)
 CloseBtn.BackgroundTransparency = 1
 CloseBtn.TextColor3 = Color3.new(1, 1, 1)
 
-local MiniBtn = Instance.new("TextButton", TitleBar)
-MiniBtn.Text = "-"
-MiniBtn.Position = UDim2.new(1, -70, 0, 0)
-MiniBtn.Size = UDim2.new(0, 35, 1, 0)
-MiniBtn.BackgroundTransparency = 1
-MiniBtn.TextColor3 = Color3.new(1, 1, 1)
-MiniBtn.TextSize = 20
-
--- 3. Sidebar có thanh cuộn (Scrolling Sidebar)
+-- 3. Sidebar (Vùng chứa nút bấm)
 Sidebar.Parent = MainFrame
 Sidebar.BackgroundColor3 = SIDEBAR_BG
 Sidebar.Position = UDim2.new(0, 5, 0, 40)
@@ -71,27 +63,25 @@ Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
 SidebarScroll.Parent = Sidebar
 SidebarScroll.Size = UDim2.new(1, 0, 1, -60)
 SidebarScroll.BackgroundTransparency = 1
-SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0) -- Tự động cập nhật theo số nút
 SidebarScroll.ScrollBarThickness = 2
-SidebarScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 local Layout = Instance.new("UIListLayout", SidebarScroll)
 Layout.Padding = UDim.new(0, 6)
-Layout.HorizontalAlignment = "Center"
-Instance.new("UIPadding", SidebarScroll).PaddingTop = UDim.new(0, 10)
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Instance.new("UIPadding", SidebarScroll).PaddingTop = UDim.new(0, 8)
 
--- 4. Hệ thống Tab & Các nút Menu xanh lá
+-- 4. Tạo Tab & Nút (Màu xanh lá cho tất cả)
 TabContainer.Parent = MainFrame
 TabContainer.Position = UDim2.new(0, 150, 0, 40)
 TabContainer.Size = UDim2.new(1, -155, 1, -45)
 TabContainer.BackgroundTransparency = 1
 
 local Pages = {}
-local function CreateTab(name)
+local function AddTab(name)
     local btn = Instance.new("TextButton", SidebarScroll)
-    btn.Name = name .. "Btn"
-    btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.BackgroundColor3 = ACCENT_GREEN -- Màu xanh lá đồng bộ
+    btn.Size = UDim2.new(1, -20, 0, 32)
+    btn.BackgroundColor3 = ACCENT_GREEN
     btn.Text = name
     btn.Font = Enum.Font.GothamMedium
     btn.TextColor3 = Color3.new(1, 1, 1)
@@ -99,32 +89,28 @@ local function CreateTab(name)
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
     local pg = Instance.new("ScrollingFrame", TabContainer)
-    pg.Name = name .. "Page"
     pg.Size = UDim2.new(1, 0, 1, 0)
     pg.BackgroundTransparency = 1
     pg.Visible = false
-    pg.ScrollBarThickness = 2
     Pages[name] = pg
 
     btn.MouseButton1Click:Connect(function()
         for _, v in pairs(Pages) do v.Visible = false end
         pg.Visible = true
     end)
-    
-    -- Cập nhật kích thước cuộn của sidebar mỗi khi thêm nút
     SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 20)
 end
 
--- Sắp xếp nút theo thứ tự yêu cầu
-CreateTab("Status Sever")
-CreateTab("Shop")
-CreateTab("Local Player")
-CreateTab("Setting Farm")
-CreateTab("Farm")
-CreateTab("Stack Farm")
-CreateTab("Farmming Other")
+-- Thứ tự nút chuẩn theo yêu cầu của bạn
+AddTab("Status Sever")
+AddTab("Shop")
+AddTab("Local Player")
+AddTab("Setting Farm")
+AddTab("Farm")
+AddTab("Stack Farm")
+AddTab("Farmming Other")
 
--- 5. Profile (Nền xám nhẹ chút xíu)
+-- 5. Profile (Nền xám nhẹ cố định bên dưới)
 local Profile = Instance.new("Frame", Sidebar)
 Profile.Size = UDim2.new(1, -10, 0, 45)
 Profile.Position = UDim2.new(0, 5, 1, -50)
@@ -148,10 +134,10 @@ Name.TextXAlignment = "Left"
 Name.Font = "GothamMedium"
 Name.TextSize = 10
 
--- Mặc định mở tab đầu tiên
+-- Mở mặc định
 Pages["Status Sever"].Visible = true
 
--- Đóng mở UI bằng phím Ctrl Trái
+-- Đóng UI
 CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
 UserInputService.InputBegan:Connect(function(io, p)
     if not p and io.KeyCode == Enum.KeyCode.LeftControl then MainFrame.Visible = not MainFrame.Visible end
