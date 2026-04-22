@@ -1,13 +1,14 @@
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local StartTime = os.time()
 
 -- 1. KHỞI TẠO GIAO DIỆN CHÍNH
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AltapHub_FullEdition"
+ScreenGui.Name = "AltapHub_Fixed"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -20,7 +21,7 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- Thanh tiêu đề màu xanh lá
+-- Thanh tiêu đề
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
@@ -36,14 +37,24 @@ TitleText.TextColor3 = Color3.new(1, 1, 1)
 TitleText.TextSize = 16
 TitleText.TextXAlignment = "Left"
 
+-- Nút thu nhỏ (-) và Đóng (X)
+local MinimizeBtn = Instance.new("TextButton", TitleBar)
+MinimizeBtn.Text = "-"
+MinimizeBtn.Position = UDim2.new(1, -70, 0, 0)
+MinimizeBtn.Size = UDim2.new(0, 35, 1, 0)
+MinimizeBtn.BackgroundTransparency = 1
+MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+MinimizeBtn.TextSize = 20
+
 local CloseBtn = Instance.new("TextButton", TitleBar)
 CloseBtn.Text = "X"
 CloseBtn.Position = UDim2.new(1, -35, 0, 0)
 CloseBtn.Size = UDim2.new(0, 35, 1, 0)
 CloseBtn.BackgroundTransparency = 1
 CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.TextSize = 16
 
--- 2. SIDEBAR & PROFILE
+-- 2. SIDEBAR
 local Sidebar = Instance.new("Frame", MainFrame)
 Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Sidebar.Position = UDim2.new(0, 5, 0, 40)
@@ -51,16 +62,12 @@ Sidebar.Size = UDim2.new(0, 140, 1, -45)
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
 
 local SidebarScroll = Instance.new("ScrollingFrame", Sidebar)
-SidebarScroll.Size = UDim2.new(1, 0, 1, -60)
+SidebarScroll.Size = UDim2.new(1, 0, 1, -55)
 SidebarScroll.BackgroundTransparency = 1
 SidebarScroll.ScrollBarThickness = 2
+Instance.new("UIListLayout", SidebarScroll).Padding = UDim.new(0, 5)
 
-local Layout = Instance.new("UIListLayout", SidebarScroll)
-Layout.Padding = UDim.new(0, 6)
-Layout.HorizontalAlignment = "Center"
-Instance.new("UIPadding", SidebarScroll).PaddingTop = UDim.new(0, 10)
-
--- Profile nền xám nhẹ
+-- Profile
 local Profile = Instance.new("Frame", Sidebar)
 Profile.Size = UDim2.new(1, -10, 0, 45)
 Profile.Position = UDim2.new(0, 5, 1, -50)
@@ -74,17 +81,17 @@ Img.Image = Players:GetUserThumbnailAsync(player.UserId, "HeadShot", "Size420x42
 Img.BackgroundTransparency = 1
 Instance.new("UICorner", Img).CornerRadius = UDim.new(1, 0)
 
-local Name = Instance.new("TextLabel", Profile)
-Name.Text = player.DisplayName
-Name.Size = UDim2.new(1, -45, 1, 0)
-Name.Position = UDim2.new(0, 42, 0, 0)
-Name.TextColor3 = Color3.new(1, 1, 1)
-Name.BackgroundTransparency = 1
-Name.TextXAlignment = "Left"
-Name.Font = "GothamMedium"
-Name.TextSize = 10
+local NameText = Instance.new("TextLabel", Profile)
+NameText.Text = "KienTheGamer"
+NameText.Size = UDim2.new(1, -45, 1, 0)
+NameText.Position = UDim2.new(0, 42, 0, 0)
+NameText.TextColor3 = Color3.new(1, 1, 1)
+NameText.BackgroundTransparency = 1
+NameText.TextXAlignment = "Left"
+NameText.Font = "GothamMedium"
+NameText.TextSize = 10
 
--- 3. HỆ THỐNG TAB (CÁC NÚT MÀU XANH LÁ)
+-- 3. HỆ THỐNG TAB
 local TabContainer = Instance.new("Frame", MainFrame)
 TabContainer.Position = UDim2.new(0, 150, 0, 40)
 TabContainer.Size = UDim2.new(1, -155, 1, -45)
@@ -93,7 +100,7 @@ TabContainer.BackgroundTransparency = 1
 local Pages = {}
 local function AddTab(name)
     local btn = Instance.new("TextButton", SidebarScroll)
-    btn.Size = UDim2.new(1, -20, 0, 32)
+    btn.Size = UDim2.new(1, -10, 0, 32)
     btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
     btn.Text = name
     btn.Font = Enum.Font.GothamMedium
@@ -112,10 +119,8 @@ local function AddTab(name)
         for _, v in pairs(Pages) do v.Visible = false end
         pg.Visible = true
     end)
-    SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 20)
 end
 
--- Sắp xếp nút chuẩn theo yêu cầu
 AddTab("Status Sever")
 AddTab("Shop")
 AddTab("Local Player")
@@ -124,79 +129,80 @@ AddTab("Farm")
 AddTab("Stack Farm")
 AddTab("Farmming Other")
 
--- 4. NỘI DUNG CHI TIẾT TAB STATUS SEVER
+-- 4. TAB STATUS SEVER
 local StatusPage = Pages["Status Sever"]
 Instance.new("UIListLayout", StatusPage).Padding = UDim.new(0, 5)
-Instance.new("UIPadding", StatusPage).PaddingTop = UDim.new(0, 10)
 
 local function CreateStatusLabel(text)
     local label = Instance.new("TextLabel", StatusPage)
-    label.Size = UDim2.new(0.95, 0, 0, 28)
+    label.Size = UDim2.new(0.98, 0, 0, 30)
     label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     label.Text = text
     label.TextColor3 = Color3.new(1, 1, 1)
     label.Font = Enum.Font.GothamMedium
-    label.TextSize = 11
-    Instance.new("UICorner", label).CornerRadius = UDim.new(0, 4)
+    label.TextSize = 12
+    Instance.new("UICorner", label).CornerRadius = UDim.new(0, 5)
     return label
 end
 
-local TimerLab = CreateStatusLabel("Timer: 0h 0m 0s")
-local SvrTimerLab = CreateStatusLabel("Server Timer: 0h 0m 0s")
-local EliteLab = CreateStatusLabel("Elite Hunter: ❌")
-local DKLab = CreateStatusLabel("Dough King: ❌")
-local KataLab = CreateStatusLabel("Katakuri: ❌")
-local MobLab = CreateStatusLabel("Cake Prince: Checking Mobs...")
-local TyrantLab = CreateStatusLabel("Tyrant Eyes: 0 Eyes")
-local LeviLab = CreateStatusLabel("Leviathan: Checking...")
+local TimerL = CreateStatusLabel("Timer: 0h 0m 0s")
+local SvrTimerL = CreateStatusLabel("Server Timer: 0h 0m 0s")
+local EliteL = CreateStatusLabel("Elite Hunter: ❌")
+local DKL = CreateStatusLabel("Dough King: ❌")
+local KataL = CreateStatusLabel("Katakuri: ❌")
+local MobL = CreateStatusLabel("Cake Prince: Checking...")
+local TyrantL = CreateStatusLabel("Tyrant Eyes: 0 Eyes")
+local LeviL = CreateStatusLabel("Leviathan: Checking...")
 
--- 5. LOGIC CẬP NHẬT TRẠNG THÁI
+-- 5. LOGIC FIX (BOSS CHECK & TOGGLE UI)
 local function formatT(s)
     return string.format("%dh %dm %ds", s/3600, (s/60)%60, s%60)
 end
 
 spawn(function()
-    while wait(1) do
-        TimerLab.Text = "Timer: " .. formatT(os.time() - StartTime)
-        SvrTimerLab.Text = "Server Timer: " .. formatT(math.floor(workspace.DistributedGameTime))
+    while task.wait(1) do
+        TimerL.Text = "Timer: " .. formatT(os.time() - StartTime)
+        SvrTimerL.Text = "Server Timer: " .. formatT(math.floor(workspace.DistributedGameTime))
         
-        -- Quét Boss
-        local enemies = workspace:FindFirstChild("Enemies") or workspace
-        local eFound = false
-        for _, v in pairs(enemies:GetChildren()) do
-            if table.find({"Deandre", "Diablo", "Urban"}, v.Name) then
-                EliteLab.Text = "Elite: " .. v.Name .. " ✅"
-                EliteLab.TextColor3 = Color3.new(0, 1, 0)
-                eFound = true break
-            end
+        -- Fix Check Boss (Duyệt cả Enemies và Map)
+        local eliteNames = {"Deandre", "Diablo", "Urban"}
+        local foundElite = nil
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Model") and table.find(eliteNames, v.Name) then foundElite = v.Name break end
         end
-        if not eFound then EliteLab.Text = "Elite Hunter: ❌" EliteLab.TextColor3 = Color3.new(1, 0.3, 0.3) end
-        
-        local dk = enemies:FindFirstChild("Dough King")
-        DKLab.Text = "Dough King: " .. (dk and "✅" or "❌")
-        DKLab.TextColor3 = dk and Color3.new(0, 1, 0) or Color3.new(1, 0.3, 0.3)
-        
-        local kt = enemies:FindFirstChild("Cake Prince")
-        KataLab.Text = "Katakuri: " .. (kt and "✅" or "❌")
-        KataLab.TextColor3 = kt and Color3.new(0, 1, 0) or Color3.new(1, 0.3, 0.3)
+        EliteL.Text = foundElite and ("Elite: " .. foundElite .. " ✅") or "Elite Hunter: ❌"
+        EliteL.TextColor3 = foundElite and Color3.new(0, 1, 0) or Color3.new(1, 0.3, 0.3)
+
+        local dk = workspace:FindFirstChild("Dough King", true)
+        DKL.Text = "Dough King: " .. (dk and "✅" or "❌")
+        DKL.TextColor3 = dk and Color3.new(0, 1, 0) or Color3.new(1, 0.3, 0.3)
+
+        local kata = workspace:FindFirstChild("Cake Prince", true) or workspace:FindFirstChild("Katakuri", true)
+        KataL.Text = "Katakuri: " .. (kata and "✅" or "❌")
+        KataL.TextColor3 = kata and Color3.new(0, 1, 0) or Color3.new(1, 0.3, 0.3)
 
         -- Cake Prince Mobs Left
         pcall(function()
             local count = ReplicatedStorage.Remotes.Validator.GetEnemyCount:InvokeServer()
-            MobLab.Text = "Cake Prince: " .. (500 - count) .. " Mobs"
+            MobL.Text = "Cake Prince: " .. (500 - count) .. " Mobs"
         end)
-        
-        -- Tyrant Eyes & Leviathan
-        local tyrant = enemies:FindFirstChild("Tyrant Eyes")
-        TyrantLab.Text = tyrant and "Tyrant Eyes: ✅" or "Tyrant Eyes: 0 Eyes"
-        LeviLab.Text = "Leviathan: You can find leviathan now"
-        LeviLab.TextColor3 = Color3.new(0.7, 0.7, 1)
     end
 end)
 
--- Mặc định mở Status & Đóng/Mở UI
-Pages["Status Sever"].Visible = true
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-UserInputService.InputBegan:Connect(function(io, p)
-    if not p and io.KeyCode == Enum.KeyCode.LeftControl then MainFrame.Visible = not MainFrame.Visible end
+-- Fix Lỗi Phím Tắt & Thu Nhỏ
+local isMinimized = false
+MinimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    MainFrame.Visible = not isMinimized
 end)
+
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if input.KeyCode == Enum.KeyCode.LeftControl then
+        MainFrame.Visible = not MainFrame.Visible
+        isMinimized = not MainFrame.Visible
+    end
+end)
+
+Pages["Status Sever"].Visible = true
